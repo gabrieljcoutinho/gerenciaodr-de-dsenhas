@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Senhas Simples</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #252525; /* Fundo preto */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #d4d4d4; /* Cor do texto padrão para melhor contraste */
+        }
+
+        .container {
+            background-color: #1e1e1e; /* Um tom mais escuro para o container */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); /* Sombra neon ciano */
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #00ffff; /* Neon ciano */
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ff00; /* Neon verde */
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 16px);
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            background-color: #ff00ff; /* Neon magenta */
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #cc00cc; /* Tom mais escuro do neon magenta */
+        }
+
+        #passwordList {
+            margin-top: 30px;
+            border-top: 2px solid #333;
+            padding-top: 20px;
+        }
+
+        #passwordList h2 {
+            color: #ffff00; /* Neon amarelo */
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        #passwordList ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #passwordList li {
+            background-color: #333;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+        }
+
+        .password-info {
+            flex-grow: 1;
+        }
+
+        .password-actions button {
+            margin-left: 10px;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+
+        .hidden-password {
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span style="color: #00ffff;">Gerenciador</span> de <span style="color: #ff00ff;">Senhas</span></h1>
+
+        <h2><span style="color: #00ff00;">Adicionar</span> Nova Senha</h2>
+        <div class="form-group">
+            <label for="nome"><span style="color: #00ff00;">Nome</span> (Opcional):</label>
+            <input type="text" id="nome" placeholder="Nome da pessoa (opcional)">
+        </div>
+        <div class="form-group">
+            <label for="site"><span style="color: #00ff00;">Site</span>:</label>
+            <input type="text" id="site" placeholder="Ex: Google">
+        </div>
+        <div class="form-group">
+            <label for="username"><span style="color: #00ff00;">Usuário</span>:</label>
+            <input type="text" id="username" placeholder="Seu nome de usuário">
+        </div>
+        <div class="form-group">
+            <label for="password"><span style="color: #00ff00;">Senha</span>:</label>
+            <input type="password" id="password" placeholder="Sua senha">
+        </div>
+        <button onclick="addPassword()"><span style="color: #fff;">Salvar Senha</span></button>
+
+        <div id="passwordList">
+            <h2><span style="color: #ffff00;">Senhas</span> Salvas</h2>
+            <ul id="passwords">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        let passwords = [];
+
+        function loadPasswords() {
+            const storedPasswords = localStorage.getItem('passwords');
+            if (storedPasswords) {
+                passwords = JSON.parse(storedPasswords);
+                displayPasswords();
+            }
+        }
+
+        function savePasswords() {
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+        }
+
+        function addPassword() {
+            const nomeInput = document.getElementById('nome');
+            const siteInput = document.getElementById('site');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            const nome = nomeInput.value.trim();
+            const site = siteInput.value.trim();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (site && username && password) {
+                passwords.push({ nome: nome || '', site, username, password });
+                savePasswords();
+                displayPasswords();
+                nomeInput.value = '';
+                siteInput.value = '';
+                usernameInput.value = '';
+                passwordInput.value = '';
+            } else {
+                alert('Por favor, preencha os campos de Site, Usuário e Senha.');
+            }
+        }
+
+        function displayPasswords() {
+            const passwordsListElement = document.getElementById('passwords');
+            passwordsListElement.innerHTML = '';
+
+            passwords.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                const nomeDisplay = item.nome ? `<span style="color: #00ffff;">${item.nome}</span> - ` : '<span style="color: #888;">Nome não disponível</span> - ';
+                listItem.innerHTML = `
+                    <div class="password-info">
+                        ${nomeDisplay}<span style="color: #ffff00;">${item.site}</span>:
+                        <span class="hidden-password" id="password-${index}">********</span>
+                    </div>
+                    <div class="password-actions">
+                        <button style="background-color: #00ff00; color: #fff; border: none;" onclick="showPassword(${index})">Mostrar</button>
+                        <button style="background-color: #ff0000; color: #fff; border: none;" onclick="deletePassword(${index})">Excluir</button>
+                    </div>
+                `;
+                passwordsListElement.appendChild(listItem);
+            });
+        }
+
+        function showPassword(index) {
+            const passwordElement = document.getElementById(`password-${index}`);
+            passwordElement.textContent = passwords[index].password;
+        }
+
+        function deletePassword(index) {
+            if (confirm('Tem certeza que deseja excluir esta senha?')) {
+                passwords.splice(index, 1);
+                savePasswords();
+                displayPasswords();
+            }
+        }
+
+        // Carregar senhas ao carregar a página
+        loadPasswords();
+    </script>
+</body>
+</html>
